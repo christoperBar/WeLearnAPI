@@ -1,13 +1,13 @@
 package studentcontroller
 
 import (
-	// "net/http"
 	"fmt"
+	"net/http"
 
 	"github.com/christoperBar/WeLearnAPI/models"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
-	// "gorm.io/gorm"
+	"gorm.io/gorm"
 )
 
 var validate = validator.New()
@@ -60,5 +60,28 @@ func Register(c *fiber.Ctx) error {
 }
 
 func UserProfile(c *fiber.Ctx) error {
+
+	id := c.Params("id")
+
+	var student models.Student
+	if err := models.DB.First(&student, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return c.Status(http.StatusNotFound).JSON(fiber.Map{
+				"message": "Data not Found",
+			})
+		}
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{
+			"message": "Data not Found",
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"id":        student.Id,
+		"authid":    student.AuthId,
+		"dob":       student.DOB,
+		"address":   student.Address,
+		"phone":     student.Phone,
+		"image_url": student.Image_url,
+	})
 
 }

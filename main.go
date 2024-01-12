@@ -13,7 +13,7 @@ func main() {
 	app := fiber.New()
 
 	app.Post("/api/students/register", studentcontroller.Register)
-	app.Post("/api/students/:id", studentcontroller.UserProfile)
+	app.Get("/api/students/:id", studentcontroller.UserProfile)
 
 	app.Listen(":8000")
 }
