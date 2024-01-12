@@ -13,6 +13,6 @@ func ConnectDatabase() {
 		panic(err)
 	}
 
-	// db.AutoMigrate(&Todo{})
+	db.AutoMigrate(&Student{}, &Instructor{}, &Category{}, &Learning_path{}, &Expertise{}, &Lesson{}, &Sayembara{})
 	DB = db
 }
