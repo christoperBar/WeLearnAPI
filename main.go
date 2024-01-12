@@ -15,5 +15,12 @@ func main() {
 	app.Post("/api/students/register", studentcontroller.Register)
 	app.Get("/api/students/:id", studentcontroller.UserProfile)
 
+	app.Get("/api/students/:id/sayembaras", studentcontroller.SayembaraList)
+	app.Get("/api/students/:id/sayembaras/:sayembaraid", studentcontroller.SayembaraDetail)
+
+	//todo
+	// app.Put("/api/students/:id/sayembaras/:sayembaraid", studentcontroller.EditStatussayembara)
+	// app.Post("/api/students/:id/sayembaras/", studentcontroller.CreateSayembara)
+
 	app.Listen(":8000")
 }

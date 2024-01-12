@@ -12,6 +12,6 @@ type Sayembara struct {
 
 	Expertises []Expertise `gorm:"many2many:sayembara_expertises;" json:"expertises"`
 
-	Student  Student  `gorm:"foreignKey:Student_ID" json:"-"`
-	Category Category `gorm:"foreignKey:Category_ID" json:"-"`
+	Student  Student  `gorm:"foreignKey:Student_ID" json:"student"`
+	Category Category `gorm:"foreignKey:Category_ID" json:"category"`
 }
