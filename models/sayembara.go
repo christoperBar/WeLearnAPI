@@ -7,6 +7,7 @@ type Sayembara struct {
 	Budget_min  float32 `gorm:"type:decimal(10,2)" json:"budget_min"`
 	Budget_max  float32 `gorm:"type:decimal(10,2)" json:"budget_max"`
 	Image_url   string  `gorm:"type:varchar(200)" json:"image_url"`
+	Status      string  `gorm:"type:ENUM('On Going', 'Closed') DEFAULT 'On Going'" json:"status"`
 	Student_ID  int64   `json:"student_id"`
 	Category_ID int64   `json:"category_id"`
 

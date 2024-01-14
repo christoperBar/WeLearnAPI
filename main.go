@@ -20,7 +20,7 @@ func main() {
 
 	//todo
 	// app.Put("/api/students/:id/sayembaras/:sayembaraid", studentcontroller.EditStatussayembara)
-	// app.Post("/api/students/:id/sayembaras/", studentcontroller.CreateSayembara)
+	app.Post("/api/students/:id/sayembaras/", studentcontroller.CreateSayembara)
 
 	app.Listen(":8000")
 }
