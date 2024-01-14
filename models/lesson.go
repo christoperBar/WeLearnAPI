@@ -12,7 +12,7 @@ type Lesson struct {
 	Category_ID      int64    `json:"category_id"`
 	Learning_path_ID int64    `json:"leaarning_path_id"`
 
-	Instructor    Instructor    `gorm:"foreignKey:Instructor_ID" json:"-"`
-	Category      Category      `gorm:"foreignKey:Category_ID" json:"-"`
-	Learning_path Learning_path `gorm:"foreignKey:Learning_path_ID" json:"-"`
+	Instructor    Instructor    `gorm:"foreignKey:Instructor_ID" json:"instructor"`
+	Category      Category      `gorm:"foreignKey:Category_ID" json:"category"`
+	Learning_path Learning_path `gorm:"foreignKey:Learning_path_ID" json:"learning_path"`
 }
