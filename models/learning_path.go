@@ -1,9 +1,12 @@
 package models
 
-type Learning_path struct {
-	Id          int64  `gorm:"primaryKey" json:"id"`
-	Title       string `gorm:"type:varchar(50)" json:"title"`
-	Description string `gorm:"type:text" json:"description"`
+import "github.com/google/uuid"
 
-	Lessons []Lesson `gorm:"foreignKey:Learning_path_ID" json:"lesson"`
+type Learning_path struct {
+	Id          uuid.UUID `gorm:"type:varchar(36);default:(UUID());primary_key;" json:"id"`
+	Title       string    `gorm:"type:varchar(50)" json:"title"`
+	Description string    `gorm:"type:text" json:"description"`
+
+	Lessons    []Lesson    `gorm:"many2many:lesson_learningpath" json:"lesson"`
+	Expertises []Expertise `gorm:"many2many:sayembara_expertises;" json:"expertises"`
 }

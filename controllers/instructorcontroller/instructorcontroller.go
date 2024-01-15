@@ -6,16 +6,17 @@ import (
 
 	"github.com/christoperBar/WeLearnAPI/models"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type InstructorExpertiseDTO struct {
-	Id   int64  `json:"id"`
-	Name string `json:"name"`
+	Id   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
 }
 
 type InstructorListDTO struct {
-	Id         int64                    `json:"id"`
+	Id         uuid.UUID                `json:"id"`
 	AuthId     string                   `json:"authid"`
 	DOB        string                   `json:"dob"`
 	Address    string                   `json:"address"`

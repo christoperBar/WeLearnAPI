@@ -5,9 +5,15 @@ import (
 	"github.com/christoperBar/WeLearnAPI/controllers/studentcontroller"
 	"github.com/christoperBar/WeLearnAPI/models"
 	"github.com/gofiber/fiber/v2"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+
+	err := godotenv.Load()
+	if err != nil {
+		panic("Error loading .env file")
+	}
 
 	models.ConnectDatabase()
 
@@ -26,6 +32,10 @@ func main() {
 	//instrucors
 	app.Get("/api/instructors", instructorcontroller.InstructorList)
 	app.Get("/api/instructors/:id", instructorcontroller.InstructorDetail)
+
+	//lessons
+	app.Get("/api/instructors/:id/lessons", instructorcontroller.LessonList)
+	app.Get("/api/instructors/:id/lessons/:lessonid", instructorcontroller.LessonDetail)
 
 	app.Listen(":8000")
 }
