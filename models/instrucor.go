@@ -15,6 +15,7 @@ type Instructor struct {
 	IDcard_url    string    `gorm:"type:varchar(200)" json:"idcard_url"`
 	Selfie_url    string    `gorm:"type:varchar(200)" json:"selfie_url"`
 
-	Lessons    []Lesson    `gorm:"foreignKey:Instructor_ID" json:"lesson"`
-	Expertises []Expertise `gorm:"many2many:instrucor_expertises;" json:"expertises"`
+	Lessons        []Lesson        `gorm:"foreignKey:Instructor_ID" json:"lesson"`
+	Learning_paths []Learning_path `gorm:"foreignKey:Instructor_ID" json:"learning_path"`
+	Expertises     []Expertise     `gorm:"many2many:instrucor_expertises;" json:"expertises"`
 }

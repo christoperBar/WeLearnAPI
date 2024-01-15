@@ -37,5 +37,9 @@ func main() {
 	app.Get("/api/instructors/:id/lessons", instructorcontroller.LessonList)
 	app.Get("/api/instructors/:id/lessons/:lessonid", instructorcontroller.LessonDetail)
 
+	//LearningPath
+	app.Get("/api/instructors/:id/learningpaths", instructorcontroller.LearningPathList)
+	app.Get("/api/instructors/:id/learningpaths/:learningpathid", instructorcontroller.LearningPathDetail)
+
 	app.Listen(":8000")
 }
