@@ -27,7 +27,7 @@ func main() {
 	app.Get("/api/students/:id/sayembaras", studentcontroller.SayembaraList)
 	app.Get("/api/students/:id/sayembaras/:sayembaraid", studentcontroller.SayembaraDetail)
 	// app.Put("/api/students/:id/sayembaras/:sayembaraid", studentcontroller.EditStatussayembara)
-	app.Post("/api/students/:id/sayembaras/", studentcontroller.CreateSayembara)
+	app.Post("/api/students/:id/sayembaras", studentcontroller.CreateSayembara)
 
 	//instrucors
 	app.Post("/api/instructors/register", instructorcontroller.Register)
@@ -35,6 +35,7 @@ func main() {
 	app.Get("/api/instructors/:id", instructorcontroller.InstructorDetail)
 
 	//lessons
+	app.Post("/api/instructors/:id/lessons", instructorcontroller.CreateLesson)
 	app.Get("/api/instructors/:id/lessons", instructorcontroller.LessonList)
 	app.Get("/api/instructors/:id/lessons/:lessonid", instructorcontroller.LessonDetail)
 

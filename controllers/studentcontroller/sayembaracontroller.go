@@ -181,7 +181,7 @@ type CreateSayembaraRequest struct {
 		Min float32 `json:"min" validate:"required"`
 		Max float32 `json:"max" validate:"required"`
 	} `json:"budget" validate:"required"`
-	Image_url string `json:"image_url" validate:"required"`
+	Image_url string `json:"image_url"`
 	ClosedAt  string `json:"closedat" validate:"required"`
 }
 
