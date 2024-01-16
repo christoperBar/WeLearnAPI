@@ -8,6 +8,8 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
+
+	fbAdmin "github.com/christoperBar/WeLearnAPI/config/auth"
 )
 
 var validate = validator.New()
@@ -16,17 +18,18 @@ var validate = validator.New()
 func Register(c *fiber.Ctx) error {
 
 	var requestData struct {
-		AuthID  string `json:"authId"`
-		DOB     string `json:"DOB"`
-		Address struct {
+		Username string `json:"username"`
+		Phone    string `json:"phone"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
+		DOB      string `json:"DOB"`
+		Address  struct {
 			StreetNumber             int    `json:"street_number"`
 			Route                    string `json:"route"`
 			PostalCode               int    `json:"postal_code"`
 			Locality                 string `json:"locality"`
 			AdministrativeAreaLevel1 string `json:"administrative_area_level_1"`
 		} `json:"address"`
-		Phone    string `json:"phone"`
-		ImageURL string `json:"image_url"`
 	}
 
 	if err := c.BodyParser(&requestData); err != nil {
@@ -35,23 +38,44 @@ func Register(c *fiber.Ctx) error {
 		})
 	}
 
-	var address = fmt.Sprintf("%d %s, %d, %s, %s", requestData.Address.StreetNumber, requestData.Address.Route, requestData.Address.PostalCode, requestData.Address.Locality, requestData.Address.AdministrativeAreaLevel1)
+	var imageUrl string = "https://api.multiavatar.com/" + requestData.Username + ".svg"
 
 	student := models.Student{
-		AuthId:    requestData.AuthID,
+		DOB:       requestData.DOB,
+		Phone:     requestData.Phone,
+		Image_url: imageUrl,
+	}
+	client, InitAutherr := fbAdmin.InitAtuh().Auth(c.Context())
+	if InitAutherr != nil {
+		panic("init fb failed" + InitAutherr.Error())
+	}
+	newUser := fbAdmin.CreateUser(
+		c.Context(),
+		client,
+		student,
+		requestData.Email,
+		requestData.Password,
+		requestData.Username,
+		false,
+	)
+
+	var address = fmt.Sprintf("%d %s, %d, %s, %s", requestData.Address.StreetNumber, requestData.Address.Route, requestData.Address.PostalCode, requestData.Address.Locality, requestData.Address.AdministrativeAreaLevel1)
+
+	createdStudent := models.Student{
+		AuthId:    newUser.UID,
 		DOB:       requestData.DOB,
 		Address:   address,
 		Phone:     requestData.Phone,
-		Image_url: requestData.ImageURL,
+		Image_url: imageUrl,
 	}
 
-	if err := validate.Struct(student); err != nil {
+	if err := validate.Struct(createdStudent); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "Invalid Request",
 		})
 	}
 
-	if err := models.DB.Create(&student).Error; err != nil {
+	if err := models.DB.Create(&createdStudent).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": err.Error(),
 		})
