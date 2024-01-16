@@ -7,10 +7,83 @@ import (
 	"strings"
 
 	"github.com/christoperBar/WeLearnAPI/models"
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
+
+//Lesson
+
+type CreateLessonRequest struct {
+	Title       string   `json:"title" validate:"required"`
+	Description string   `json:"description" validate:"required"`
+	Price       float32  `json:"price" validate:"required"`
+	Tags        []string `json:"tags" validate:"required"`
+	Method      []string `json:"method" validate:"required"`
+	Image_url   string   `json:"image_url"`
+	Category_ID string   `json:"category_id" validate:"required"`
+}
+
+func CreateLesson(c *fiber.Ctx) error {
+
+	id := c.Params("id")
+
+	var instructor models.Instructor
+	if err := models.DB.Where("id = ?", id).First(&instructor).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return c.Status(http.StatusNotFound).JSON(fiber.Map{
+				"message": "Data not Found",
+			})
+		}
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{
+			"message": "Data not Found",
+		})
+	}
+
+	var request CreateLessonRequest
+	if err := c.BodyParser(&request); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"message": "Invalid request format",
+		})
+	}
+
+	validate := validator.New()
+	if err := validate.Struct(request); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"message": "Validation error",
+			"errors":  err.Error(),
+		})
+	}
+
+	categoryUUID, err := uuid.Parse(request.Category_ID)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"message": "Invalid UUID format for CategoryID",
+		})
+	}
+
+	tags := strings.Join(request.Tags, ", ")
+	method := strings.Join(request.Method, ", ")
+
+	lesson := models.Lesson{
+		Title:         request.Title,
+		Description:   request.Description,
+		Price:         request.Price,
+		Tags:          tags,
+		Method:        method,
+		Image_url:     request.Image_url,
+		Category_ID:   categoryUUID,
+		Instructor_ID: instructor.Id,
+	}
+
+	if err := models.DB.Create(&lesson).Error; err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Failed to create Sayembara",
+		})
+	}
+	return c.Status(fiber.StatusOK).Send(nil)
+}
 
 type LessonInstructorDTO struct {
 	Id         uuid.UUID                `json:"id"`
