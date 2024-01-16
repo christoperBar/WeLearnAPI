@@ -5,12 +5,81 @@ import (
 	"strings"
 
 	"github.com/christoperBar/WeLearnAPI/models"
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 //learningpath
+
+type CreateLearningPathRequest struct {
+	Title       string   `json:"title" validate:"required"`
+	Description string   `json:"description" validate:"required"`
+	Lessons     []string `json:"lessons" validate:"required"`
+}
+
+func CreateLearningPath(c *fiber.Ctx) error {
+
+	id := c.Params("id")
+
+	var instructor models.Instructor
+	if err := models.DB.Where("id = ?", id).First(&instructor).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return c.Status(http.StatusNotFound).JSON(fiber.Map{
+				"message": "Data not Found",
+			})
+		}
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{
+			"message": "Data not Found",
+		})
+	}
+
+	var request CreateLearningPathRequest
+	if err := c.BodyParser(&request); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"message": "Invalid request format",
+		})
+	}
+
+	validate := validator.New()
+	if err := validate.Struct(request); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"message": "Validation error",
+			"errors":  err.Error(),
+		})
+	}
+
+	learningpath := models.Learning_path{
+		Title:         request.Title,
+		Description:   request.Description,
+		Instructor_ID: instructor.Id,
+	}
+
+	if err := models.DB.Create(&learningpath).Error; err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Failed to create Sayembara",
+		})
+	}
+
+	for _, lessonID := range request.Lessons {
+		newlearningpath := models.Learning_path{}
+		lesson := models.Lesson{}
+		if err := models.DB.Where("id = ?", lessonID).First(&lesson).Error; err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+				"message": "Failed to find Expertise",
+			})
+		}
+		if err := models.DB.Where("title = ?", request.Title).First(&newlearningpath).Error; err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+				"message": "Failed to find Sayembara",
+			})
+		}
+
+		models.DB.Model(&newlearningpath).Association("Lessons").Append(&lesson)
+	}
+	return c.Status(fiber.StatusOK).Send(nil)
+}
 
 type Learning_pathListDTO struct {
 	Id          uuid.UUID       `json:"id"`
