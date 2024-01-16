@@ -40,6 +40,7 @@ func main() {
 	app.Get("/api/instructors/:id/lessons/:lessonid", instructorcontroller.LessonDetail)
 
 	//LearningPath
+	app.Post("/api/instructors/:id/learningpaths", instructorcontroller.CreateLearningPath)
 	app.Get("/api/instructors/:id/learningpaths", instructorcontroller.LearningPathList)
 	app.Get("/api/instructors/:id/learningpaths/:learningpathid", instructorcontroller.LearningPathDetail)
 
