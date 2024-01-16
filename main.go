@@ -30,6 +30,7 @@ func main() {
 	app.Post("/api/students/:id/sayembaras/", studentcontroller.CreateSayembara)
 
 	//instrucors
+	app.Post("/api/instructors/register", instructorcontroller.Register)
 	app.Get("/api/instructors", instructorcontroller.InstructorList)
 	app.Get("/api/instructors/:id", instructorcontroller.InstructorDetail)
 
