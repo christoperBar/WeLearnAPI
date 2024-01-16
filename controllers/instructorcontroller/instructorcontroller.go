@@ -2,13 +2,76 @@ package instructorcontroller
 
 import (
 	// "fmt"
+	"fmt"
 	"net/http"
 
 	"github.com/christoperBar/WeLearnAPI/models"
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
+
+// instructor
+
+var validate = validator.New()
+
+func Register(c *fiber.Ctx) error {
+
+	var requestData struct {
+		AuthID  string `json:"authId"`
+		DOB     string `json:"DOB"`
+		Address struct {
+			StreetNumber             int    `json:"street_number"`
+			Route                    string `json:"route"`
+			PostalCode               int    `json:"postal_code"`
+			Locality                 string `json:"locality"`
+			AdministrativeAreaLevel1 string `json:"administrative_area_level_1"`
+		} `json:"address"`
+		Phone         string `json:"phone"`
+		ImageURL      string `json:"image_url"`
+		Email         string `json:"email"`
+		ID_type       string `json:"id_type"`
+		IDcard_number string `json:"idcard_number"`
+		IDcard_url    string `json:"idcard_url"`
+		Selfie_url    string `json:"selfie_url"`
+	}
+
+	if err := c.BodyParser(&requestData); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	var address = fmt.Sprintf("%d %s, %d, %s, %s", requestData.Address.StreetNumber, requestData.Address.Route, requestData.Address.PostalCode, requestData.Address.Locality, requestData.Address.AdministrativeAreaLevel1)
+
+	instructor := models.Instructor{
+		AuthId:        requestData.AuthID,
+		DOB:           requestData.DOB,
+		Address:       address,
+		Phone:         requestData.Phone,
+		Image_url:     requestData.ImageURL,
+		Email:         requestData.Email,
+		ID_type:       requestData.ID_type,
+		IDcard_number: requestData.IDcard_number,
+		IDcard_url:    requestData.IDcard_url,
+		Selfie_url:    requestData.Selfie_url,
+	}
+
+	if err := validate.Struct(instructor); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Invalid Request",
+		})
+	}
+
+	if err := models.DB.Create(&instructor).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).Send(nil)
+}
 
 type InstructorExpertiseDTO struct {
 	Id   uuid.UUID `json:"id"`
