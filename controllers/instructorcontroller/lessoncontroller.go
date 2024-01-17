@@ -112,14 +112,26 @@ type LessonListDTO struct {
 }
 
 func LessonList(c *fiber.Ctx) error {
+
 	id := c.Params("id")
+	searchTag := c.Query("tags")
+
 	var lessons []models.Lesson
 
-	if err := models.DB.Preload("Category").Where("instructor_id = ?", id).Find(&lessons).Error; err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"message": "Internal Server Error",
-		})
+	if searchTag != "" {
+		if err := models.DB.Preload("Category").Where("instructor_id = ?", id).Where("tags LIKE ?", "%"+searchTag+"%").Find(&lessons).Error; err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+				"message": "Internal Server Error",
+			})
+		}
+	} else {
+		if err := models.DB.Preload("Category").Where("instructor_id = ?", id).Find(&lessons).Error; err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+				"message": "Internal Server Error",
+			})
+		}
 	}
+
 	var instructor models.Instructor
 	models.DB.Preload("Expertises").Where("id = ?", id).First(&instructor)
 

@@ -89,16 +89,27 @@ type InstructorListDTO struct {
 }
 
 func InstructorList(c *fiber.Ctx) error {
-	var instrucors []models.Instructor
 
-	if err := models.DB.Preload("Expertises").Find(&instrucors).Error; err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"message": "Internal Server Error",
-		})
+	searchAddress := c.Query("address")
+
+	var instructors []models.Instructor
+
+	if searchAddress != "" {
+		if err := models.DB.Preload("Expertises").Where("address LIKE ?", "%"+searchAddress+"%").Find(&instructors).Error; err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+				"message": "Internal Server Error",
+			})
+		}
+	} else {
+		if err := models.DB.Preload("Expertises").Find(&instructors).Error; err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+				"message": "Internal Server Error",
+			})
+		}
 	}
 
 	var instructorsDTO []InstructorListDTO
-	for _, instructor := range instrucors {
+	for _, instructor := range instructors {
 
 		var expertisesDTO []InstructorExpertiseDTO
 		for _, expertise := range instructor.Expertises {

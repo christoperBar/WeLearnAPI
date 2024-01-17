@@ -12,7 +12,7 @@ import (
 )
 
 func InitAtuh() *firebase.App {
-	opt := option.WithCredentialsFile("/Users/alizaenalabidin/Downloads/welearngamacitra-firebase-adminsdk-ty673-7cfe5e29a3.json")
+	opt := option.WithCredentialsFile("/Users/chris/Downloads/welearngamacitra-firebase-adminsdk-ty673-7cfe5e29a3.json")
 	app, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
 		panic("error initializing app: %v\n")
