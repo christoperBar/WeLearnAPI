@@ -53,9 +53,25 @@ type SayembaraListDTO struct {
 func SayembaraList(c *fiber.Ctx) error {
 
 	id := c.Params("id")
+	searchExpertise := c.Query("expertise")
+	searchCategory := c.Query("category")
+
 	var sayembaras []models.Sayembara
 
-	if err := models.DB.Preload("Student").Preload("Category").Preload("Expertises").Where("student_id = ?", id).Find(&sayembaras).Error; err != nil {
+	query := models.DB.Preload("Student").Preload("Category").Preload("Expertises").Where("student_id = ?", id)
+
+	if searchExpertise != "" {
+		query = query.Joins("JOIN sayembara_expertises ON sayembara_expertises.sayembara_id = sayembaras.id").
+			Joins("JOIN expertises ON expertises.id = sayembara_expertises.expertise_id").
+			Where("expertises.name LIKE ?", "%"+searchExpertise+"%")
+	}
+
+	if searchCategory != "" {
+		query = query.Joins("JOIN categories ON categories.id = sayembaras.category_id").
+			Where("categories.name LIKE ?", "%"+searchCategory+"%")
+	}
+
+	if err := query.Find(&sayembaras).Error; err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"message": "Internal Server Error",
 		})
