@@ -22,6 +22,6 @@ func ConnectDatabase() {
 		panic(err)
 	}
 
-	db.AutoMigrate(&Student{}, &Instructor{}, &Category{}, &Learning_path{}, &Expertise{}, &Lesson{}, &Sayembara{}, &Rating{})
+	db.AutoMigrate(&Student{}, &Instructor{}, &Category{}, &Learning_path{}, &Expertise{}, &Lesson{}, &Sayembara{}, &Rating{}, &Order{})
 	DB = db
 }
