@@ -14,7 +14,10 @@ type Instructor struct {
 	IDcard_number string    `gorm:"type:varchar(100)" json:"idcard_number" validate:"required"`
 	IDcard_url    string    `gorm:"type:varchar(200)" json:"idcard_url" validate:"required"`
 	Selfie_url    string    `gorm:"type:varchar(200)" json:"selfie_url" validate:"required"`
+	Category_ID   uuid.UUID `json:"category_id" validate:"required"`
 
+	Category       Category        `gorm:"foreignKey:Category_ID" json:"category"`
+	Ratings        []Rating        `gorm:"foreignKey:Instructor_ID" json:"rating"`
 	Lessons        []Lesson        `gorm:"foreignKey:Instructor_ID" json:"lesson"`
 	Learning_paths []Learning_path `gorm:"foreignKey:Instructor_ID" json:"learning_path"`
 	Expertises     []Expertise     `gorm:"many2many:instrucor_expertises;" json:"expertises"`

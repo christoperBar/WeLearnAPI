@@ -20,6 +20,7 @@ func main() {
 	app := fiber.New()
 
 	//students
+	app.Get("/api/students/filter-options", studentcontroller.Filter)
 	app.Post("/api/students/register", studentcontroller.Register)
 	app.Get("/api/students/:id", studentcontroller.UserProfile)
 
@@ -35,6 +36,8 @@ func main() {
 	app.Get("/api/instructors/:id", instructorcontroller.InstructorDetail)
 
 	//lessons
+	app.Get("/api/students/:id/lessons/suggestion", instructorcontroller.Suggestion)
+	app.Get("/api/lessons", instructorcontroller.AllLesson)
 	app.Post("/api/instructors/:id/lessons", instructorcontroller.CreateLesson)
 	app.Get("/api/instructors/:id/lessons", instructorcontroller.LessonList)
 	app.Get("/api/instructors/:id/lessons/:lessonid", instructorcontroller.LessonDetail)

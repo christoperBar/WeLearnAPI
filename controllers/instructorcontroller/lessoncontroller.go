@@ -4,6 +4,7 @@ import (
 	// "fmt"
 
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/christoperBar/WeLearnAPI/models"
@@ -111,25 +112,133 @@ type LessonListDTO struct {
 	Image_url   string              `json:"image_url"`
 }
 
+func AllLesson(c *fiber.Ctx) error {
+	searchTag := c.Query("tags")
+	searchMethod := c.Query("method")
+	searchTitle := c.Query("search")
+	searchPrice := c.Query("price")
+
+	var lessons []models.Lesson
+
+	query := models.DB.Preload("Category")
+
+	if searchTag != "" {
+		query = query.Where("tags LIKE ?", "%"+searchTag+"%")
+	}
+
+	if searchMethod != "" {
+		query = query.Where("method LIKE ?", "%"+searchMethod+"%")
+	}
+
+	if searchTitle != "" {
+		query = query.Where("title LIKE ?", "%"+searchTitle+"%")
+	}
+
+	if searchPrice != "" {
+		price, err := strconv.Atoi(searchPrice)
+		if err != nil {
+			return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+				"message": "Invalid price value",
+			})
+		}
+
+		query = query.Where("price >= ?", price)
+	}
+
+	if err := query.Find(&lessons).Error; err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Internal Server Error",
+		})
+	}
+
+	var lessonsDTO []LessonListDTO
+	for _, lesson := range lessons {
+
+		var instructor models.Instructor
+		models.DB.Preload("Expertises").Where("id = ?", lesson.Instructor_ID).First(&instructor)
+
+		var expertisesDTO []InstructorExpertiseDTO
+		for _, expertise := range instructor.Expertises {
+			expertisesDTO = append(expertisesDTO, InstructorExpertiseDTO{
+				Id:   expertise.Id,
+				Name: expertise.Name,
+			})
+		}
+
+		categoryDTO := LessonCategoryDTO{
+			Id:   lesson.Category.Id,
+			Name: lesson.Category.Name,
+		}
+
+		instructorDTO := LessonInstructorDTO{
+			Id:         instructor.Id,
+			DOB:        instructor.DOB,
+			Address:    instructor.Address,
+			Phone:      instructor.Phone,
+			Image_url:  instructor.Image_url,
+			Expertises: expertisesDTO,
+		}
+
+		tags := strings.Split(lesson.Tags, ",")
+		methods := strings.Split(lesson.Method, ",")
+
+		lessonDTO := LessonListDTO{
+			Id:          lesson.Id,
+			Instructor:  instructorDTO,
+			Title:       lesson.Title,
+			Description: lesson.Description,
+			Price:       lesson.Price,
+			Category:    categoryDTO,
+			Tags:        tags,
+			Method:      methods,
+			Image_url:   lesson.Image_url,
+		}
+
+		lessonsDTO = append(lessonsDTO, lessonDTO)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(lessonsDTO)
+}
+
 func LessonList(c *fiber.Ctx) error {
 
 	id := c.Params("id")
 	searchTag := c.Query("tags")
+	searchMethod := c.Query("method")
+	searchTitle := c.Query("search")
+	searchPrice := c.Query("price")
 
 	var lessons []models.Lesson
 
+	query := models.DB.Preload("Category").Where("instructor_id = ?", id)
+
 	if searchTag != "" {
-		if err := models.DB.Preload("Category").Where("instructor_id = ?", id).Where("tags LIKE ?", "%"+searchTag+"%").Find(&lessons).Error; err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-				"message": "Internal Server Error",
+		query = query.Where("tags LIKE ?", "%"+searchTag+"%")
+	}
+
+	if searchMethod != "" {
+		query = query.Where("method LIKE ?", "%"+searchMethod+"%")
+	}
+
+	if searchTitle != "" {
+		query = query.Where("title LIKE ?", "%"+searchTitle+"%")
+	}
+
+	if searchPrice != "" {
+		price, err := strconv.Atoi(searchPrice)
+		if err != nil {
+			return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+				"message": "Invalid price value",
 			})
 		}
-	} else {
-		if err := models.DB.Preload("Category").Where("instructor_id = ?", id).Find(&lessons).Error; err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-				"message": "Internal Server Error",
-			})
-		}
+
+		query = query.Where("price >= ?", price)
+	}
+
+	if err := query.Find(&lessons).Error; err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Internal Server Error",
+		})
 	}
 
 	var instructor models.Instructor
@@ -239,4 +348,85 @@ func LessonDetail(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(lessonDTO)
+}
+
+func Suggestion(c *fiber.Ctx) error {
+	id := c.Params("id")
+
+	var student models.Student
+
+	if err := models.DB.Where("id = ?", id).First(&student).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return c.Status(http.StatusNotFound).JSON(fiber.Map{
+				"message": "Data not Found",
+			})
+		}
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{
+			"message": "Data not Found",
+		})
+	}
+
+	var lessons []models.Lesson
+	query := models.DB.Preload("Category").Where("category_id = ?", student.Category_ID)
+
+	if strings.Contains(student.Method, "Online") {
+		query = query.Where("method LIKE ?", "%Online%")
+	}
+	if strings.Contains(student.Method, "Offline") {
+		query = query.Where("method LIKE ?", "%Offline%")
+	}
+
+	if err := query.Find(&lessons).Error; err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Internal Server Error",
+		})
+	}
+
+	var lessonsDTO []LessonListDTO
+	for _, lesson := range lessons {
+
+		var instructor models.Instructor
+		models.DB.Preload("Expertises").Where("id = ?", lesson.Instructor_ID).First(&instructor)
+
+		var expertisesDTO []InstructorExpertiseDTO
+		for _, expertise := range instructor.Expertises {
+			expertisesDTO = append(expertisesDTO, InstructorExpertiseDTO{
+				Id:   expertise.Id,
+				Name: expertise.Name,
+			})
+		}
+
+		categoryDTO := LessonCategoryDTO{
+			Id:   lesson.Category.Id,
+			Name: lesson.Category.Name,
+		}
+
+		instructorDTO := LessonInstructorDTO{
+			Id:         instructor.Id,
+			DOB:        instructor.DOB,
+			Address:    instructor.Address,
+			Phone:      instructor.Phone,
+			Image_url:  instructor.Image_url,
+			Expertises: expertisesDTO,
+		}
+
+		tags := strings.Split(lesson.Tags, ",")
+		methods := strings.Split(lesson.Method, ",")
+
+		lessonDTO := LessonListDTO{
+			Id:          lesson.Id,
+			Instructor:  instructorDTO,
+			Title:       lesson.Title,
+			Description: lesson.Description,
+			Price:       lesson.Price,
+			Category:    categoryDTO,
+			Tags:        tags,
+			Method:      methods,
+			Image_url:   lesson.Image_url,
+		}
+
+		lessonsDTO = append(lessonsDTO, lessonDTO)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(lessonsDTO)
 }
