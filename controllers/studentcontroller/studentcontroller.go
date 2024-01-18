@@ -74,7 +74,7 @@ func Register(c *fiber.Ctx) error {
 	method := strings.Join(requestData.Method, ", ")
 
 	createdStudent := models.Student{
-		AuthId:      newUser.UID,
+		Id:          newUser.UID,
 		DOB:         requestData.DOB,
 		Address:     address,
 		Phone:       requestData.Phone,
@@ -116,7 +116,6 @@ func UserProfile(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"id":        student.Id,
-		"authid":    student.AuthId,
 		"dob":       student.DOB,
 		"address":   student.Address,
 		"phone":     student.Phone,

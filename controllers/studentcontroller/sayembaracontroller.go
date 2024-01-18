@@ -23,12 +23,12 @@ type SayembaraCategoryDTO struct {
 }
 
 type SayembaraStudentDTO struct {
-	Id        uuid.UUID `json:"id"`
-	AuthID    string    `json:"authid"`
-	DOB       string    `json:"dob"`
-	Address   string    `json:"address"`
-	Phone     string    `json:"phone"`
-	Image_url string    `json:"image_url"`
+	Id        string `json:"id"`
+	AuthID    string `json:"authid"`
+	DOB       string `json:"dob"`
+	Address   string `json:"address"`
+	Phone     string `json:"phone"`
+	Image_url string `json:"image_url"`
 }
 
 type SayembaraBudgetDTO struct {
@@ -95,7 +95,6 @@ func SayembaraList(c *fiber.Ctx) error {
 
 		studentDTO := SayembaraStudentDTO{
 			Id:        sayembara.Student.Id,
-			AuthID:    sayembara.Student.AuthId,
 			DOB:       sayembara.Student.DOB,
 			Address:   sayembara.Student.Address,
 			Phone:     sayembara.Student.Phone,
@@ -159,7 +158,6 @@ func SayembaraDetail(c *fiber.Ctx) error {
 
 	studentDTO := SayembaraStudentDTO{
 		Id:        sayembara.Student.Id,
-		AuthID:    sayembara.Student.AuthId,
 		DOB:       sayembara.Student.DOB,
 		Address:   sayembara.Student.Address,
 		Phone:     sayembara.Student.Phone,
